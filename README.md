@@ -5,7 +5,7 @@ This app and the arduino project retrieves the data from the following service:
 
 http://todo-backend-express.herokuapp.com
 
-The mobile app have been done in React Native.
+The mobile app have been done in React Native. Screenshots in https://github.com/Marcoo09/IOTRemoteReminder/tree/master/screenshots
 
 The connection ports are:
 
