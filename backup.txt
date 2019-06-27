@@ -1,0 +1,126 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
+#include <ESP8266HTTPClient.h>
+#include <ArduinoJson.h>
+#include "SoftwareSerial.h"
+
+#define STASSID "AntelGCxGx"
+#define STAPSK  "7kkhs6mn"
+
+#define STASSID2 "RDAMIANI"
+#define STAPSK2  "45490400"
+
+#define STASSID3 "Marco";
+#define STAPSK3  "123456789";
+
+SoftwareSerial NodeMCU(0,1);
+const char* ssid = STASSID3;
+const char* password = STAPSK3;
+
+char apiResponse[1000] = "No Response"; //String data
+
+void setup () {
+  Serial.begin(9600);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print("Connecting..");
+
+  } 
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
+    WiFiClient client;
+    HTTPClient http;  //Declare an object of class HTTPClient
+    http.begin(client,"http://todo-backend-express.herokuapp.com/");  //Specify request destination
+    //http.begin("http://worldtimeapi.org/api/timezone/America/Montevideo");
+   // WiFiClient client = http.getStream();
+    
+    int httpCode = http.GET();                                                                  //Send the request
+    if (httpCode > 0) { //Check the returning code
+      String payload = http.getString();   //Get the request response payload
+      //Serial.println(payload);
+     /*NUEVO*/
+      StaticJsonBuffer<1000> jsonBuffer;
+      //Serial.println("Testeando el json array");
+      // create an empty array
+      JsonArray& array1 = jsonBuffer.createArray();
+      // parse a JSON array
+      JsonArray& array2 = jsonBuffer.parseArray(payload);
+      char *titleOfNearest;
+      char * hour = "24";
+      for(int i = 0;i < sizeof(array2);i++){
+       // Serial.println("----------------");
+        const char* world = array2[i]["title"];
+        const char* isCompleted = array2[i]["completed"];
+        const char* url = array2[i]["url"];
+
+        char* worldAux = const_cast<char*>(world);
+        char delim[] = "|";
+        char *token = strtok(worldAux,delim);
+        int index = 0;
+        char *importantInfo[2];
+        while (token)
+        {
+          importantInfo[index++] = token;
+          token = strtok(NULL,delim);
+        }
+
+        if(strcmp(importantInfo[1],hour) <= 0){
+          titleOfNearest = importantInfo[0];
+          hour = importantInfo[1];
+        }
+       // int hour = atoi(importantInfo[1]);
+        //Serial.println("Hora ");
+        //Serial.println(hour);
+       // for(int j = 0; j < 2; j++){
+        //      Serial.println(importantInfo[j]);
+        //}
+        /*Prueba*/
+        /*Serial.println(worldAux);
+        Serial.println(isCompleted);
+        Serial.println(url);
+        Serial.println("----------------");*/
+      }
+
+      /*Consume api hour time*/
+   /*   WiFiClient clientHourApi;
+      HTTPClient httpHourApi;
+      httpHourApi.begin("http://worldtimeapi.org/api/timezone/America/Montevideo");
+    
+    int httpCodeHourApi = httpHourApi.GET();                                                                  //Send the request
+    if (httpCodeHourApi > 0) { //Check the returning code
+      String payloadHourApi = httpHourApi.getString();   //Get the request response payload
+    
+     /*NUEVO*/
+    //  StaticJsonBuffer<1000> jsonBufferHourApi;
+      //Serial.println("Testeando el json array");
+     // parse a JSON array
+    /*  JsonArray& arrayOfHour = jsonBufferHourApi.parseArray(payloadHourApi);
+
+      for(int i = 0;i < sizeof(arrayOfHour);i++){
+        const char* hour = arrayOfHour[i]["datetime"];
+
+        char* hourAux = const_cast<char*>(hour);
+        Serial.println(hour);
+        Serial.println("----------------");
+      }
+      
+    }*/
+      int lenOfNearest = strlen(titleOfNearest);
+      Serial.write(titleOfNearest,lenOfNearest); //Write the serial data
+    }
+    http.end();   //Close connection
+  }
+  delay(30000);    //Send a request every 30 seconds
+
+ //Recorro toda la lista de respuestas
+ //Si la hora actual coincide con alguna guardo esa para mostrar, prendo flag de que hay algo para mostrar
+ //Muestro en pantalla display
+ //Leer con sensor de distancia si hay alguien cerca, si flag y alguien cerca
+ //sueno la alarma
+
+ 
+}
