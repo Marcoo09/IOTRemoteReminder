@@ -25,7 +25,7 @@
     "redux-mock-store": "^1.5.3",
     "redux-thunk": "^2.3.0",
     "typescript": "^3.3.4000",
-    "yarn": "^1.13.0"
+    "yarn": "^1.22.0"
   },
   "devDependencies": {
     "@babel/core": "7.3.4",
